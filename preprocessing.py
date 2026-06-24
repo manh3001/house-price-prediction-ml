@@ -7,7 +7,7 @@ per-feature default values used to fill unspecified inputs at predict time.
 import numpy as np
 import pandas as pd
 
-from sklearn.compose import ColumnTransformer
+from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -25,10 +25,10 @@ def load_data(path: str = DATA_PATH):
     return X, y
 
 
-def split_columns(X: pd.DataFrame):
+def split_columns(X: pd.DataFrame) -> tuple[list[str], list[str]]:
     """Return (numeric_cols, categorical_cols) as lists of names."""
-    numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
-    categorical_cols = X.select_dtypes(include=["object"]).columns.tolist()
+    numeric_cols = X.select_dtypes(include=np.number).columns.tolist()
+    categorical_cols = X.select_dtypes(include=object).columns.tolist()
     return numeric_cols, categorical_cols
 
 
@@ -46,21 +46,11 @@ def build_pipeline(model) -> Pipeline:
     ])
     preprocessor = ColumnTransformer(transformers=[
         ("num", numeric_transformer,
-         make_column_selector_numeric()),
+         make_column_selector(dtype_include=np.number)),
         ("cat", categorical_transformer,
-         make_column_selector_categorical()),
+         make_column_selector(dtype_include=object)),
     ])
     return Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
-
-
-def make_column_selector_numeric():
-    from sklearn.compose import make_column_selector
-    return make_column_selector(dtype_include=np.number)
-
-
-def make_column_selector_categorical():
-    from sklearn.compose import make_column_selector
-    return make_column_selector(dtype_include=object)
 
 
 def compute_defaults(X: pd.DataFrame) -> dict:
