@@ -4,6 +4,8 @@
 Single source of truth for column splits, the sklearn Pipeline, and the
 per-feature default values used to fill unspecified inputs at predict time.
 """
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -12,7 +14,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-DATA_PATH = "data/train.csv"
+_HERE = Path(__file__).resolve().parent
+DATA_PATH = str(_HERE / "data" / "train.csv")
 TARGET = "SalePrice"
 
 

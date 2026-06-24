@@ -1,11 +1,14 @@
 """Predict a house price from a partial feature dict (CLI + importable)."""
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import joblib
 
-_model = joblib.load("house_price_model.pkl")
-_columns = joblib.load("model_columns.pkl")
-_defaults = joblib.load("feature_defaults.pkl")
+_HERE = Path(__file__).resolve().parent
+_model = joblib.load(_HERE / "house_price_model.pkl")
+_columns = joblib.load(_HERE / "model_columns.pkl")
+_defaults = joblib.load(_HERE / "feature_defaults.pkl")
 
 
 def build_input(features: dict) -> pd.DataFrame:
@@ -14,7 +17,7 @@ def build_input(features: dict) -> pd.DataFrame:
     for key, value in features.items():
         if key not in row:
             raise KeyError(f"Unknown feature: {key}")
-        row[key] = value
+        row[key] = type(_defaults[key])(value)
     return pd.DataFrame([row], columns=list(_columns))
 
 

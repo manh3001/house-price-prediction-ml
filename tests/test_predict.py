@@ -17,3 +17,4 @@ def test_build_input_has_all_columns_one_row():
     df = predict.build_input({"GrLivArea": 2000})
     assert df.shape[0] == 1
     assert df.loc[0, "GrLivArea"] == 2000
+    assert df.shape[1] == len(predict._columns)

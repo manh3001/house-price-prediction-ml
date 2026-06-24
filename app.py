@@ -29,7 +29,7 @@ def predict():
 
     try:
         price = predictor.predict(data)
-    except (ValueError, TypeError) as exc:
+    except (KeyError, ValueError, TypeError) as exc:
         return jsonify({"error": f"Invalid feature value: {exc}"}), 400
     except Exception as exc:  # pragma: no cover - unexpected
         return jsonify({"error": str(exc)}), 500
