@@ -1,45 +1,42 @@
+"""Flask REST API for house price prediction."""
 from flask import Flask, request, jsonify
-import pandas as pd
-import numpy as np
-import joblib
+
+import predict as predictor
 
 app = Flask(__name__)
+_VALID_KEYS = set(predictor._defaults.keys())
 
-# load model khi server start
-print("Loading model...")
-model = joblib.load("house_price_model.pkl")
-model_columns = joblib.load("model_columns.pkl")
-print("Model loaded!")
 
 @app.route("/")
 def home():
     return "House Price Prediction API is running!"
 
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok", "model_loaded": True})
+
+
 @app.route("/predict", methods=["POST"])
 def predict():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Request body must be a JSON object of features."}), 400
+
+    unknown = [k for k in data if k not in _VALID_KEYS]
+    if unknown:
+        return jsonify({"error": f"Unknown feature(s): {unknown}"}), 400
+
     try:
-        data = request.json  # nhận JSON từ client
+        price = predictor.predict(data)
+    except (ValueError, TypeError) as exc:
+        return jsonify({"error": f"Invalid feature value: {exc}"}), 400
+    except Exception as exc:  # pragma: no cover - unexpected
+        return jsonify({"error": str(exc)}), 500
 
-        # tạo dataframe đủ columns
-        input_df = pd.DataFrame(columns=model_columns)
-        input_df.loc[0] = 0
+    return jsonify({"predicted_price": round(price, 2)})
 
-        # gán các field user gửi
-        for key, value in data.items():
-            input_df[key] = value
-
-        # predict
-        pred_log = model.predict(input_df)
-        pred_price = float(np.exp(pred_log)[0])
-
-        return jsonify({
-            "predicted_price": round(pred_price, 2)
-        })
-
-    except Exception as e:
-        return jsonify({
-            "error": str(e)
-        })
 
 if __name__ == "__main__":
+    print("Loading model... model loaded!")
     app.run(debug=True)
