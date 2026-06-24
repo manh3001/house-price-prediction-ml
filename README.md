@@ -34,6 +34,10 @@ Categorical features:
 - Fill missing values with most frequent value
 - One-Hot Encoding
 
+This preprocessing is applied uniformly to every candidate model via a shared
+scikit-learn `Pipeline`. Scaling is required by the linear model (Ridge) and is
+harmless for the tree-based models (Random Forest, HistGradientBoosting).
+
 After preprocessing: Original shape: (1460, 81), Processed shape: ~287 features
 
 ## Model Performance
@@ -74,7 +78,10 @@ Unspecified features fall back to training-set defaults (median/mode), so partia
 pytest
 ```
 
-## Test API with Postman
+## Manual API Testing (optional)
+
+For exploratory testing of the running server with Postman (the automated test
+suite above is the primary way to verify behavior):
 
 1.  Open Postman
 2.  POST http://127.0.0.1:5000/predict
