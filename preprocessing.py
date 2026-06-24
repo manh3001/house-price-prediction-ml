@@ -42,7 +42,7 @@ def build_pipeline(model) -> Pipeline:
     ])
     categorical_transformer = Pipeline(steps=[
         ("imputer", SimpleImputer(strategy="constant", fill_value="Missing")),
-        ("onehot", OneHotEncoder(handle_unknown="ignore")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
     ])
     preprocessor = ColumnTransformer(transformers=[
         ("num", numeric_transformer,
