@@ -38,5 +38,5 @@ def predict():
 
 
 if __name__ == "__main__":
-    print("Loading model... model loaded!")
+    print("Starting House Price Prediction API...")
     app.run(debug=True)

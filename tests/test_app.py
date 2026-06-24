@@ -11,6 +11,7 @@ def test_health_ok():
     resp = client().get("/health")
     assert resp.status_code == 200
     assert resp.get_json()["status"] == "ok"
+    assert resp.get_json()["model_loaded"] is True
 
 
 def test_predict_valid_returns_price():
