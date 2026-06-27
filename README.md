@@ -1,82 +1,108 @@
-# 🏠 House Price Prediction -- End-to-End Machine Learning Project
+# House Price Prediction -- End-to-End Machine Learning Project
 
-## 📌 Overview
+## Overview
 
 This project builds a machine learning system to predict house prices
 using the Kaggle Ames Housing dataset and deploys the trained model as a
 REST API using Flask.
 
-This is a full end-to-end ML pipeline including: - Data preprocessing -
-Model training - Model serialization - REST API deployment - API testing
-with Postman
+This is a full end-to-end ML pipeline including: Data preprocessing,
+model training, model serialization, REST API deployment, and automated
+testing.
 
 Perfect for portfolio / graduation project.
 
-## 🎯 Objectives
+## Objectives
 
 -   Predict house prices based on house features
 -   Build reproducible ML pipeline
 -   Deploy ML model as an API
 -   Demonstrate real-world ML workflow
 
-## 📊 Dataset
+## Dataset
 
 Ames Housing Dataset - 1460 rows - 81 features - Mix of numeric and
 categorical data
 
-## 🧠 Machine Learning Pipeline
+## Machine Learning Pipeline
 
-Numeric features: - Fill missing values with median - StandardScaler
-normalization
+Numeric features:
+- Fill missing values with median
+- StandardScaler normalization
 
-Categorical features: - Fill missing values with most frequent value -
-One-Hot Encoding
+Categorical features:
+- Fill missing values with most frequent value
+- One-Hot Encoding
 
-After preprocessing: Original shape: (1460, 81)\
-Processed shape: \~287 features
+This preprocessing is applied uniformly to every candidate model via a shared
+scikit-learn `Pipeline`. Scaling is required by the linear model (Ridge) and is
+harmless for the tree-based models (Random Forest, HistGradientBoosting).
 
-## 📈 Model Performance
+After preprocessing: Original shape: (1460, 81), Processed shape: ~287 features
 
-Ridge Regression\
-Final RMSE ≈ 23,798 USD
+## Model Performance
 
-## 🌐 Deploy Model as API
+Best model selected by 5-fold cross-validation among Ridge, Random Forest, and HistGradientBoosting. See `train.py` output for the chosen model and held-out RMSE.
 
-Run API: python app.py
+## Deploy Model as API
+
+Run API: `python app.py`
 
 Server: http://127.0.0.1:5000
 
-## 🔌 API Usage
+Note: Running `python train.py` regenerates the `.pkl` artifacts (now git-ignored).
 
-POST /predict
+## API Usage
 
-Example JSON: { "GrLivArea": 1800, "OverallQual": 7, "GarageCars": 2,
-"YearBuilt": 2005 }
+**POST /predict**
 
-Response: { "predicted_price": 4937241.88 }
+Example JSON:
+```json
+{ "GrLivArea": 1800, "OverallQual": 7, "GarageCars": 2, "YearBuilt": 2005 }
+```
 
-## 🧪 Test API with Postman
+Response:
+```json
+{ "predicted_price": 215000.0 }
+```
+
+Unspecified features fall back to training-set defaults (median/mode), so partial inputs still give sensible predictions.
+
+**Health check**
+
+`GET /health` -> `{"status": "ok", "model_loaded": true}`
+
+## Run Tests
+
+```bash
+pytest
+```
+
+## Manual API Testing (optional)
+
+For exploratory testing of the running server with Postman (the automated test
+suite above is the primary way to verify behavior):
 
 1.  Open Postman
 2.  POST http://127.0.0.1:5000/predict
-3.  Body → raw → JSON
+3.  Body -> raw -> JSON
 4.  Click Send
 
-## 💡 Real-World Applications
+## Real-World Applications
 
 -   Real estate websites
 -   Property mobile apps
 -   Bank valuation tools
 -   Market analysis dashboards
 
-## 🛠 Tech Stack
+## Tech Stack
 
 -   Scikit-learn
 -   Pandas, NumPy
 -   Joblib
 -   Flask
--   Postman
+-   pytest
 
-## 👨‍💻 Author
+## Author
 
-Mạnh Nguyễn
+Manh Nguyen

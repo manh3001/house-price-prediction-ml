@@ -1,86 +1,59 @@
-# HOUSE PRICE PREDICTION - TRAIN
-
-import pandas as pd
+# train.py
+"""Train and select the best House Price model, then save artifacts."""
 import numpy as np
 import joblib
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import Ridge
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.metrics import mean_squared_error
 
-print("Loading dataset...")
-df = pd.read_csv("data/train.csv")
+import preprocessing
 
-print("Dataset shape:", df.shape)
-
-# 1. DROP COLUMNS KHÔNG CẦN
-df = df.drop(["Id"], axis=1)
-
-# 2. TÁCH TARGET
-# Log transform target to reduce skewness
-y = np.log(df["SalePrice"])
-X = df.drop("SalePrice", axis=1)
-# 3. TÁCH NUMERIC & CATEGORICAL COLUMNS
-numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
-categorical_cols = X.select_dtypes(include=["object"]).columns
-
-# 4. PREPROCESSING PIPELINE
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
-
-from sklearn.impute import SimpleImputer
-
-numeric_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="median")),
-    ("scaler", StandardScaler())
-])
-
-categorical_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="constant", fill_value="Missing")),
-    ("onehot", OneHotEncoder(handle_unknown="ignore"))
-])
+CANDIDATES = {
+    "Ridge": Ridge(alpha=1.0),
+    "RandomForest": RandomForestRegressor(n_estimators=300, random_state=42, n_jobs=-1),
+    "HistGradientBoosting": HistGradientBoostingRegressor(random_state=42),
+}
 
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", numeric_transformer, numeric_cols),
-        ("cat", categorical_transformer, categorical_cols)
-    ]
-)
+def main():
+    print("Loading dataset...")
+    X, y = preprocessing.load_data()
+    print("Dataset shape:", X.shape)
 
-# 5. TRAIN TEST SPLIT (chưa preprocess!)
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-# 6. FULL PIPELINE = PREPROCESS + MODEL
-from sklearn.linear_model import Ridge
-from sklearn.metrics import mean_squared_error
+    print("\nComparing models via 5-fold CV (neg RMSE on log target)...")
+    best_name, best_score, best_pipeline = None, np.inf, None
+    for name, model in CANDIDATES.items():
+        pipe = preprocessing.build_pipeline(model)
+        scores = cross_val_score(
+            pipe, X_train, y_train, cv=5,
+            scoring="neg_root_mean_squared_error", n_jobs=-1,
+        )
+        rmse_log = -scores.mean()
+        print(f"  {name:22s} CV log-RMSE = {rmse_log:.4f}")
+        if rmse_log < best_score:
+            best_name, best_score, best_pipeline = name, rmse_log, pipe
 
-print("\nTraining Ridge Pipeline...")
+    print(f"\nBest model: {best_name} (CV log-RMSE = {best_score:.4f})")
+    print("Refitting best model on training split...")
+    best_pipeline.fit(X_train, y_train)
 
-ridge_pipeline = Pipeline(steps=[
-    ("preprocessor", preprocessor),
-    ("model", Ridge(alpha=1.0))
-])
+    pred = np.exp(best_pipeline.predict(X_test))
+    y_true = np.exp(y_test)
+    rmse_usd = np.sqrt(mean_squared_error(y_true, pred))
+    print(f"Held-out test RMSE: ${rmse_usd:,.0f}")
 
-ridge_pipeline.fit(X_train, y_train)
+    print("\nSaving artifacts...")
+    joblib.dump(best_pipeline, "house_price_model.pkl")
+    joblib.dump(X.columns, "model_columns.pkl")
+    joblib.dump(preprocessing.compute_defaults(X), "feature_defaults.pkl")
+    print("Saved house_price_model.pkl, model_columns.pkl, feature_defaults.pkl")
 
-# 7. EVALUATE
-import numpy as np
-pred_log = ridge_pipeline.predict(X_test)
-pred = np.exp(pred_log)
-y_true = np.exp(y_test)
 
-rmse = np.sqrt(mean_squared_error(y_true, pred))
-print("Final RMSE:", rmse)
-
-# 8. SAVE MODEL
-import joblib
-joblib.dump(ridge_pipeline, "house_price_model.pkl")
-joblib.dump(X.columns, "model_columns.pkl")
-print("Pipeline saved!")
+if __name__ == "__main__":
+    main()
