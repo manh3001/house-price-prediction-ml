@@ -29,3 +29,12 @@ def test_predict_unknown_key_is_400():
 def test_predict_non_object_body_is_400():
     resp = client().post("/predict", json=[1, 2, 3])
     assert resp.status_code == 400
+
+
+def test_metadata_returns_expected_keys():
+    resp = client().get("/metadata")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert set(data) >= {"neighborhoods", "price_range", "field_ranges"}
+    assert len(data["neighborhoods"]) > 0
+    assert data["price_range"]["min"] < data["price_range"]["max"]

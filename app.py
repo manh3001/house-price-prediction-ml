@@ -2,9 +2,11 @@
 from flask import Flask, request, jsonify
 
 import predict as predictor
+import preprocessing
 
 app = Flask(__name__)
 _VALID_KEYS = set(predictor._defaults.keys())
+_METADATA = preprocessing.compute_metadata()
 
 
 @app.route("/")
@@ -15,6 +17,11 @@ def home():
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "model_loaded": True})
+
+
+@app.route("/metadata")
+def metadata():
+    return jsonify(_METADATA)
 
 
 @app.route("/predict", methods=["POST"])
