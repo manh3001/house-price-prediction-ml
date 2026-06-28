@@ -38,3 +38,12 @@ def test_metadata_returns_expected_keys():
     assert set(data) >= {"neighborhoods", "price_range", "field_ranges"}
     assert len(data["neighborhoods"]) > 0
     assert data["price_range"]["min"] < data["price_range"]["max"]
+
+
+def test_home_returns_html_page():
+    resp = client().get("/")
+    assert resp.status_code == 200
+    assert "text/html" in resp.content_type
+    body = resp.get_data(as_text=True)
+    assert 'id="house-form"' in body
+    assert 'id="Neighborhood"' in body

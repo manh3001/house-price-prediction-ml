@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Price Estimator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>House Price Estimator</h1>
+      <p class="subtitle">Adjust the features below to see an estimated sale price.</p>
+    </header>
+
+    <p id="notice" class="notice" hidden></p>
+
+    <section class="presets" aria-label="Example houses">
+      <span class="presets__label">Try an example:</span>
+      <button type="button" class="preset" data-preset="starter">Starter home</button>
+      <button type="button" class="preset" data-preset="family">Family home</button>
+      <button type="button" class="preset" data-preset="luxury">Luxury home</button>
+    </section>
+
+    <div class="layout">
+      <form id="house-form" class="form">
+        <div class="field">
+          <label for="OverallQual">Overall quality <output id="OverallQual-out"></output></label>
+          <input type="range" id="OverallQual" name="OverallQual" min="1" max="10" step="1" value="6">
+        </div>
+        <div class="field">
+          <label for="GrLivArea">Above-ground living area (sq ft)</label>
+          <input type="number" id="GrLivArea" name="GrLivArea" min="334" max="6000" step="10" value="1500">
+        </div>
+        <div class="field">
+          <label for="TotalBsmtSF">Basement area (sq ft)</label>
+          <input type="number" id="TotalBsmtSF" name="TotalBsmtSF" min="0" max="6500" step="10" value="900">
+        </div>
+        <div class="field">
+          <label for="YearBuilt">Year built</label>
+          <input type="number" id="YearBuilt" name="YearBuilt" min="1872" max="2010" step="1" value="2000">
+        </div>
+        <div class="field">
+          <label for="BedroomAbvGr">Bedrooms <output id="BedroomAbvGr-out"></output></label>
+          <input type="range" id="BedroomAbvGr" name="BedroomAbvGr" min="0" max="8" step="1" value="3">
+        </div>
+        <div class="field">
+          <label for="FullBath">Full bathrooms <output id="FullBath-out"></output></label>
+          <input type="range" id="FullBath" name="FullBath" min="0" max="4" step="1" value="2">
+        </div>
+        <div class="field">
+          <label for="GarageCars">Garage capacity (cars) <output id="GarageCars-out"></output></label>
+          <input type="range" id="GarageCars" name="GarageCars" min="0" max="4" step="1" value="2">
+        </div>
+        <div class="field">
+          <label for="Neighborhood">Neighborhood</label>
+          <select id="Neighborhood" name="Neighborhood"></select>
+        </div>
+      </form>
+
+      <aside class="result" aria-live="polite">
+        <p class="result__label">Estimated price</p>
+        <p id="price" class="result__price">—</p>
+        <div class="gauge">
+          <div id="gauge-fill" class="gauge__fill"></div>
+          <div id="gauge-marker" class="gauge__marker"></div>
+        </div>
+        <div class="gauge__scale">
+          <span id="gauge-min">—</span>
+          <span id="gauge-max">—</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

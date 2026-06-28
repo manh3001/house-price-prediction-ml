@@ -1,5 +1,5 @@
 """Flask REST API for house price prediction."""
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 import predict as predictor
 import preprocessing
@@ -11,7 +11,7 @@ _METADATA = preprocessing.compute_metadata()
 
 @app.route("/")
 def home():
-    return "House Price Prediction API is running!"
+    return render_template("index.html")
 
 
 @app.route("/health")
