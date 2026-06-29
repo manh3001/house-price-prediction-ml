@@ -47,3 +47,9 @@ def test_home_returns_html_page():
     body = resp.get_data(as_text=True)
     assert 'id="house-form"' in body
     assert 'id="Neighborhood"' in body
+    assert 'id="gauge-fill"' in body
+    assert 'id="gauge-marker"' in body
+    assert 'id="price"' in body
+    assert 'id="OverallQual"' in body
+    assert 'id="GrLivArea"' in body
+    assert 'id="GarageCars"' in body
