@@ -50,6 +50,13 @@ Run API: `python app.py`
 
 Server: http://127.0.0.1:5000
 
+### Web UI
+
+Open `http://127.0.0.1:5000/` in a browser for an interactive estimator: adjust
+8 key house features (or load a preset) and see a live price estimate with a
+gauge showing where it sits in the dataset's price range. The page is served by
+the same Flask app — no separate frontend build.
+
 Note: Running `python train.py` regenerates the `.pkl` artifacts (now git-ignored).
 
 ## API Usage
@@ -71,6 +78,12 @@ Unspecified features fall back to training-set defaults (median/mode), so partia
 **Health check**
 
 `GET /health` -> `{"status": "ok", "model_loaded": true}`
+
+**Metadata**
+
+`GET /metadata` -> `{ "neighborhoods": [...], "price_range": {min, max}, "field_ranges": {...} }`
+
+Drives the web UI's dropdown, input ranges, and price gauge from the dataset.
 
 ## Run Tests
 

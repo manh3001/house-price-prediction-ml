@@ -40,3 +40,15 @@ def test_build_pipeline_fits_and_predicts():
     pipe.fit(X, y)
     preds = pipe.predict(X.head(5))
     assert len(preds) == 5
+
+
+def test_compute_metadata_structure():
+    import preprocessing
+    meta = preprocessing.compute_metadata()
+    assert set(meta) >= {"neighborhoods", "price_range", "field_ranges"}
+    assert len(meta["neighborhoods"]) > 0
+    assert meta["neighborhoods"] == sorted(meta["neighborhoods"])
+    assert meta["price_range"]["min"] < meta["price_range"]["max"]
+    for col in ("GrLivArea", "TotalBsmtSF", "YearBuilt"):
+        r = meta["field_ranges"][col]
+        assert r["min"] <= r["max"]

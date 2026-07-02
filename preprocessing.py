@@ -17,6 +17,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 _HERE = Path(__file__).resolve().parent
 DATA_PATH = str(_HERE / "data" / "train.csv")
 TARGET = "SalePrice"
+UI_NUMERIC_FIELDS = ["GrLivArea", "TotalBsmtSF", "YearBuilt"]
 
 
 def load_data(path: str = DATA_PATH):
@@ -66,3 +67,20 @@ def compute_defaults(X: pd.DataFrame) -> dict:
         mode = X[col].mode()
         defaults[col] = str(mode.iloc[0]) if not mode.empty else "Missing"
     return defaults
+
+
+def compute_metadata(path: str = DATA_PATH) -> dict:
+    """UI metadata derived from the raw dataset: neighborhoods, price and
+    numeric-field ranges. Used to drive the frontend without hardcoding."""
+    df = pd.read_csv(path)
+    neighborhoods = sorted(df["Neighborhood"].dropna().unique().tolist())
+    price_range = {"min": int(df[TARGET].min()), "max": int(df[TARGET].max())}
+    field_ranges = {
+        col: {"min": int(df[col].min()), "max": int(df[col].max())}
+        for col in UI_NUMERIC_FIELDS
+    }
+    return {
+        "neighborhoods": neighborhoods,
+        "price_range": price_range,
+        "field_ranges": field_ranges,
+    }
